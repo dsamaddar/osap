@@ -20,15 +20,17 @@ Partial Class frmMonitoring
     Protected Sub GetEmpTaskCountList()
         bulReportList.DataTextField = "UserName"
         bulReportList.DataValueField = "ModuleUserId"
-        bulReportList.DataSource = Common.fnLoadDataSet("spGetEmpTaskCountList")
+        bulReportList.DataSource = Common.fnLoadDataSet("spGetEmpTaskCountList", Convert.ToInt32(Session("ModuleUserId")))
         bulReportList.DataBind()
     End Sub
 
     Protected Sub bulReportList_Click(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.BulletedListEventArgs) Handles bulReportList.Click
         Try
             lblPendingTaskList.Text = "Pending task list of " & bulReportList.Items(e.Index).Text
+            lblPendingTaskList.Text = "Initiated task list of " & bulReportList.Items(e.Index).Text
             lblPerformedTask.Text = "Performed task list of " & bulReportList.Items(e.Index).Text
             GetPendingTaskListByUser(bulReportList.Items(e.Index).Value)
+            GetInitiatedTaskListByUser(bulReportList.Items(e.Index).Value)
             GetPerformedTaskListByUser(bulReportList.Items(e.Index).Value)
         Catch ex As Exception
             MessageBox(ex.Message)
@@ -38,6 +40,11 @@ Partial Class frmMonitoring
     Protected Sub GetPendingTaskListByUser(ByVal ModuleUserId As Integer)
         grdPendingTaskList.DataSource = ProcessFlowData.fnGetPendingTaskListByUser(ModuleUserId)
         grdPendingTaskList.DataBind()
+    End Sub
+
+    Protected Sub GetInitiatedTaskListByUser(ByVal ModuleUserId As Integer)
+        grdInitiatedTaskList.DataSource = ProcessFlowData.fnGetInitiatedTaskListByUser(ModuleUserId)
+        grdInitiatedTaskList.DataBind()
     End Sub
 
     Protected Sub GetPerformedTaskListByUser(ByVal ModuleUserId As Integer)

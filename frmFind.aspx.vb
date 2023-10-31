@@ -136,7 +136,7 @@ Partial Class frmFind
 
     Protected Sub btnFind_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnFind.Click
         Try
-            grdSearchResult.DataSource = ProcessFlowData.fnFindTasksAndStatus(txtDescription.Text, drpDocumentType.SelectedValue, drpApprover.SelectedValue, drpTaskStatus.SelectedValue, Convert.ToDateTime(txtDateFrom.Text), Convert.ToDateTime(txtDateTo.Text))
+            grdSearchResult.DataSource = ProcessFlowData.fnFindTasksAndStatus(Convert.ToInt32(Session("ModuleUserId")), txtDescription.Text, drpDocumentType.SelectedValue, drpApprover.SelectedValue, drpTaskStatus.SelectedValue, Convert.ToDateTime(txtDateFrom.Text), Convert.ToDateTime(txtDateTo.Text))
             grdSearchResult.DataBind()
         Catch ex As Exception
             MessageBox(ex.Message)

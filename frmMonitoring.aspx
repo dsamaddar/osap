@@ -61,7 +61,8 @@
                     <tr>
                         <td style="width: 70%">
                             <div style="max-height: 250px; max-width: 100%; overflow: auto">
-                                <asp:GridView ID="grdPendingTaskList" runat="server" CssClass="mGrid" AutoGenerateColumns="False">
+                                <asp:GridView ID="grdPendingTaskList" runat="server" CssClass="mGrid" 
+                                    AutoGenerateColumns="False" EmptyDataText="No Pending Task">
                                     <Columns>
                                         <asp:BoundField DataField="ApplicationId" HeaderText="Tracking#" />
                                         <asp:TemplateField HeaderText="Memo">
@@ -86,18 +87,54 @@
                     <tr>
                         <td style="width: 70%">
                             <div class="widget-title">
+                                <asp:Label ID="lblInitiatedTask" runat="server" Text="Initiation List"></asp:Label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 70%">
+                            <div style="max-height: 250px; max-width: 100%; overflow: auto">
+                                <asp:GridView ID="grdInitiatedTaskList" runat="server" CssClass="mGrid" 
+                                    AutoGenerateColumns="False" EmptyDataText="No Initiated Task">
+                                    <Columns>
+                                        <asp:BoundField DataField="ApplicationId" HeaderText="Tracking#" />
+                                        <asp:TemplateField HeaderText="Memo">
+                                            <ItemTemplate>
+                                                <asp:HyperLink ID="hpMemo0" runat="server" CssClass="linkbtn" NavigateUrl='<%# ConfigurationManager.AppSettings("osap_storage") + Eval("FileName") %>'
+                                                    Target="_blank">Memo</asp:HyperLink>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Approved Memo">
+                                            <ItemTemplate>
+                                                <asp:HyperLink ID="hpApprovedMemo0" runat="server" CssClass="linkbtn" NavigateUrl='<%# ConfigurationManager.AppSettings("osap_storage") + Eval("ApprovedFileName") %>'
+                                                    Target="_blank">Approved Memo</asp:HyperLink>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:BoundField DataField="Type" HeaderText="Type" />
+                                        <asp:BoundField DataField="Description" HeaderText="Description" />
+                                        <asp:BoundField DataField="Initiator" HeaderText="Initiator" />
+                                        <asp:BoundField DataField="Status" HeaderText="Status" />
+                                        <asp:BoundField DataField="CreatedDate" HeaderText="CreatedDate" />
+                                        <asp:BoundField DataField="Decision" HeaderText="Decision" />
+                                        <asp:BoundField DataField="Comment" HeaderText="Comment" />
+                                        <asp:BoundField DataField="DecisionDate" HeaderText="DecisionDate" />
+                                    </Columns>
+                                </asp:GridView>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 70%">
+                            <div class="widget-title">
                                 <asp:Label ID="lblPerformedTask" runat="server" Text="Performed List"></asp:Label>
                             </div>
                         </td>
                     </tr>
                     <tr>
                         <td style="width: 70%">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="width: 70%">
                             <div style="max-height: 250px; max-width: 100%; overflow: auto">
-                                <asp:GridView ID="grdPerformedTaskList" runat="server" CssClass="mGrid" AutoGenerateColumns="False">
+                                <asp:GridView ID="grdPerformedTaskList" runat="server" CssClass="mGrid" 
+                                    AutoGenerateColumns="False" EmptyDataText="No Performed Task">
                                     <Columns>
                                         <asp:BoundField DataField="ApplicationId" HeaderText="Tracking#" />
                                         <asp:TemplateField HeaderText="Memo">

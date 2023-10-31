@@ -46,6 +46,27 @@ Public Class clsCommon
         End Try
     End Function
 
+    Public Function fnLoadDataSet(ByVal SP As String, ByVal ID As Integer) As DataSet
+        Dim da As SqlDataAdapter = New SqlDataAdapter()
+        Dim ds As DataSet = New DataSet()
+        Try
+            con.Open()
+            Using cmd As SqlCommand = New SqlCommand(SP, con)
+                cmd.CommandType = CommandType.StoredProcedure
+                cmd.Parameters.AddWithValue("@ID", ID)
+                da.SelectCommand = cmd
+                da.Fill(ds)
+                con.Close()
+                Return ds
+            End Using
+        Catch ex As Exception
+            If con.State = ConnectionState.Open Then
+                con.Close()
+            End If
+            Return Nothing
+        End Try
+    End Function
+
     Public Function fnGetValue(ByVal SP As String, ByVal id As String) As clsDataType
         Dim data_type As New clsDataType()
         Dim dr As SqlDataReader

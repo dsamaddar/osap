@@ -158,6 +158,33 @@ Public Class clsProcessFlow
 
 #End Region
 
+#Region " Get Initiated Task List By User "
+
+    Public Function fnGetInitiatedTaskListByUser(ByVal ModuleUserId As Integer) As DataSet
+
+        Dim sp As String = "spGetInitiatedTaskListByUser"
+        Dim da As SqlDataAdapter = New SqlDataAdapter()
+        Dim ds As DataSet = New DataSet()
+        Try
+            con.Open()
+            Using cmd = New SqlCommand(sp, con)
+                cmd.CommandType = CommandType.StoredProcedure
+                cmd.Parameters.AddWithValue("@ModuleUserId", ModuleUserId)
+                da.SelectCommand = cmd
+                da.Fill(ds)
+                con.Close()
+                Return ds
+            End Using
+        Catch ex As Exception
+            If con.State = ConnectionState.Open Then
+                con.Close()
+            End If
+            Return Nothing
+        End Try
+    End Function
+
+#End Region
+
 #Region " Get Performed Task List By User "
 
     Public Function fnGetPerformedTaskListByUser(ByVal ModuleUserId As Integer) As DataSet
@@ -187,7 +214,7 @@ Public Class clsProcessFlow
 
 #Region " Find Tasks And Status "
 
-    Public Function fnFindTasksAndStatus(ByVal Description As String, ByVal ApplicationTypeId As Integer, ByVal ApproverId As Integer, ByVal ProcessFlowDecisionId As Integer, ByVal StartDate As Date, ByVal EndDate As Date) As DataSet
+    Public Function fnFindTasksAndStatus(ByVal ModuleUserId As Integer, ByVal Description As String, ByVal ApplicationTypeId As Integer, ByVal ApproverId As Integer, ByVal ProcessFlowDecisionId As Integer, ByVal StartDate As Date, ByVal EndDate As Date) As DataSet
 
         Dim sp As String = "spFindTasksAndStatus"
         Dim da As SqlDataAdapter = New SqlDataAdapter()
@@ -196,6 +223,7 @@ Public Class clsProcessFlow
             con.Open()
             Using cmd = New SqlCommand(sp, con)
                 cmd.CommandType = CommandType.StoredProcedure
+                cmd.Parameters.AddWithValue("@ModuleUserId", ModuleUserId)
                 cmd.Parameters.AddWithValue("@Description", Description)
                 cmd.Parameters.AddWithValue("@ApplicationTypeId", ApplicationTypeId)
                 cmd.Parameters.AddWithValue("@ApproverId", ApproverId)
