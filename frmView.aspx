@@ -2,7 +2,6 @@
     Theme="CommonSkin" CodeFile="frmView.aspx.vb" Inherits="frmView" Title=".:OSAP:Viewer:." %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="headerPlaceHolder" runat="Server">
-
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="bodyPlaceHolder" runat="Server">
     <table width="100%">
@@ -37,37 +36,48 @@
                                         </td>
                                         <td style="width: 70%">
                                             <asp:TextBox ID="txtTrackingNo" runat="server" CssClass="InputTxtBox"></asp:TextBox>
-                                            &nbsp;<asp:Button ID="btnShow" runat="server" CssClass="styled-button-1" 
-                                                Text="Show" />
+                                            &nbsp;<asp:Button ID="btnShow" runat="server" CssClass="styled-button-1" Text="Show" />
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label">
-                                            Status</td>
+                                            Status
+                                        </td>
                                         <td>
                                             <asp:Label ID="lblStatus" runat="server" CssClass="label"></asp:Label>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label">
-                                            Initiator</td>
+                                            Initiator
+                                        </td>
                                         <td>
                                             <asp:Label ID="lblInitiator" runat="server" CssClass="label"></asp:Label>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label">
-                                            Initiation Date</td>
+                                            Initiation Date
+                                        </td>
                                         <td>
                                             <asp:Label ID="lblInitiationDate" runat="server" CssClass="label"></asp:Label>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label">
-                                            Description</td>
+                                            Application Type
+                                        </td>
                                         <td>
-                                            <asp:TextBox ID="txtDescription" runat="server" CssClass="InputTxtBox" 
-                                                Height="100px" ReadOnly="True" TextMode="MultiLine" Width="90%"></asp:TextBox>
+                                            <asp:Label ID="lblApplicationType" runat="server" CssClass="label"></asp:Label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label">
+                                            Description
+                                        </td>
+                                        <td>
+                                            <asp:TextBox ID="txtDescription" runat="server" CssClass="InputTxtBox" Height="100px"
+                                                ReadOnly="True" TextMode="MultiLine" Width="90%"></asp:TextBox>
                                         </td>
                                     </tr>
                                 </table>

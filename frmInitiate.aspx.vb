@@ -45,7 +45,7 @@ Partial Class frmInitiate
             txtDateTo.Text = Now.Date
 
             GetInitiatedList(Convert.ToInt32(Session("ModuleUserId")), Convert.ToDateTime(txtDateFrom.Text), Convert.ToDateTime(txtDateTo.Text))
-
+            GetViewLog(Convert.ToInt32(Session("ModuleUserId")))
             Session("dtApprovalFlow") = ""
 
             Dim dtApprovalFlow As DataTable = New DataTable()
@@ -53,6 +53,11 @@ Partial Class frmInitiate
             Session("dtApprovalFlow") = dtApprovalFlow
 
         End If
+    End Sub
+
+    Protected Sub GetViewLog(ByVal ModuleUserId As Integer)
+        grdViewLog.DataSource = ApplicationData.fnGetViewLog(ModuleUserId)
+        grdViewLog.DataBind()
     End Sub
 
     Protected Function AddApprovalFlow(ByVal ProcessFlow As clsProcessFlow) As DataTable

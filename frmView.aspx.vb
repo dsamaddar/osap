@@ -23,16 +23,17 @@ Partial Class frmView
         End If
     End Sub
 
-    Protected Sub GetAppInfo(ByVal tracking_no As Integer)
+    Protected Sub GetAppInfo(ByVal tracking_no As Integer, ByVal ModuleUserId As String)
         Try
             Dim file_path As String = ""
             Dim app_info As New clsApplication()
 
-            app_info = ApplicationData.fnGetApplicationInfoById(tracking_no)
+            app_info = ApplicationData.fnGetApplicationInfoById(tracking_no, ModuleUserId)
 
             lblInitiationDate.Text = app_info.CreatedDate
             lblInitiator.Text = app_info.Initiator
             lblStatus.Text = app_info.Status
+            lblApplicationType.Text = app_info.Type
             txtDescription.Text = app_info.Description
 
             GetDocumentWorkFlow(tracking_no)
@@ -83,7 +84,7 @@ Partial Class frmView
     End Sub
 
     Protected Sub btnShow_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnShow.Click
-        GetAppInfo(Convert.ToInt32(txtTrackingNo.Text))
+        GetAppInfo(Convert.ToInt32(txtTrackingNo.Text), Session("ModuleUserId"))
     End Sub
 
     Protected Sub FTPViewPDF(ByVal sender As Object, ByVal e As EventArgs)

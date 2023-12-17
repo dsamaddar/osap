@@ -392,6 +392,34 @@
                             </asp:Panel>
                         </td>
                     </tr>
+                    <tr>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="widget-title">
+                                View Log
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <asp:Panel ID="pnlViewLog" runat="server" SkinID="pnlInner">
+                                <div style="max-height: 150px; max-width: 100%; overflow: auto">
+                                    <asp:GridView ID="grdViewLog" runat="server" AutoGenerateColumns="False" Width="100%"
+                                        EmptyDataText="No View Log Found" CssClass="mGrid">
+                                        <Columns>
+                                            <asp:BoundField DataField="ApplicationId" HeaderText="ApplicationId" />
+                                            <asp:BoundField DataField="Initiator" HeaderText="Initiator" />
+                                            <asp:BoundField DataField="ApplicationType" HeaderText="ApplicationType" />
+                                            <asp:BoundField DataField="ViewDate" HeaderText="ViewDate" />
+                                        </Columns>
+                                    </asp:GridView>
+                                </div>
+                            </asp:Panel>
+                        </td>
+                    </tr>
                 </table>
             </td>
         </tr>

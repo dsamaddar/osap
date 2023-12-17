@@ -53,7 +53,7 @@ Partial Class frmApprove
             Dim lblApplicationId As New Label
 
             lblApplicationId = grdingWaitingList.SelectedRow.FindControl("lblApplicationId")
-            GetAppInfo(Convert.ToInt32(lblApplicationId.Text))
+            GetAppInfo(Convert.ToInt32(lblApplicationId.Text), Session("ModuleUserId"))
             btnAccept.Enabled = True
             btnReject.Enabled = True
         Catch ex As Exception
@@ -73,12 +73,12 @@ Partial Class frmApprove
         Page.Controls.Add(lbl)
     End Sub
 
-    Protected Sub GetAppInfo(ByVal tracking_no As Integer)
+    Protected Sub GetAppInfo(ByVal tracking_no As Integer, ByVal ModuleUserId As String)
         Try
             Dim file_path As String = ""
             Dim app_info As New clsApplication()
 
-            app_info = ApplicationData.fnGetApplicationInfoById(tracking_no)
+            app_info = ApplicationData.fnGetApplicationInfoById(tracking_no, ModuleUserId)
 
             txtDescription.Text = app_info.Description
 
@@ -401,7 +401,7 @@ Partial Class frmApprove
             Dim RootPath As String = "\\FILESERV.mfilbd.com\hiddenMFILGatewayApplicationStorage$\OSAP\"
 
             Dim app_info As New clsApplication()
-            app_info = ApplicationData.fnGetApplicationInfoById(ApplicationId)
+            app_info = ApplicationData.fnGetApplicationInfoById(ApplicationId, Session("ModuleUserId"))
 
             Dim dtApprovalFlow As DataTable = New DataTable()
             'dtApprovalFlow = FormatApprovalFlowTable()

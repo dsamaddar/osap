@@ -1,3 +1,29 @@
+-- drop table tblViewLog
+create table tblViewLog(
+ViewLogID int identity(1,1) primary key,
+ApplicationId bigint foreign key references dbo.Application(ApplicationId),
+ModuleUserId bigint,
+ViewDate datetime default getdate()
+);
+
+GO
+
+-- exec spGetViewLog 361
+alter proc spGetViewLog
+@ModuleUserId bigint
+as
+begin
+	select v.ApplicationId,u.DisplayName as 'Initiator',t.ApplicationTypeText as ApplicationType,v.ViewDate
+	from tblViewLog v 
+	inner join dbo.Application a on v.ApplicationId = a.ApplicationId
+	inner join dbo.ApplicationType t on a.ApplicationTypeId = t.ApplicationTypeId
+	inner join dbo.ModuleUser u on a.ApplicantId = u.ModuleUserId
+	where v.ModuleUserId = @ModuleUserId
+	order by v.ViewDate desc;
+end
+
+GO
+
 ----------------------------- Module User -----------------------------
 
 create proc spInsertModuleUser
@@ -133,6 +159,8 @@ RETURN 1
 end
 
 GO
+
+-- exec spPermanentRejectApplication 83840,'Wrong entry'
 
 alter proc spPermanentRejectApplication
 @ApplicationId int,
@@ -277,7 +305,7 @@ end
 
 GO
 
--- exec spGetOsapPermanentRejectionMail 42167,''
+-- exec spGetOsapPermanentRejectionMail 56053,'Wrong Posting'
 alter proc spGetOsapPermanentRejectionMail
 @ApplicationId int,
 @RejectionRemarks nvarchar(500)
@@ -612,7 +640,14 @@ begin
 	Declare @MailTo as nvarchar(200) Set @MailTo = ''
 	Declare @MailFrom as nvarchar(200) Set @MailFrom =''
 	Declare @MailCC as nvarchar(200) Set @MailCC = ''
+	Declare @MailBCC as nvarchar(200) Set @MailBCC = ''
+	
 	Declare @SoftwareLink  as nvarchar(500) Set @SoftwareLink = 'http://ext.mfilbd.com/osap/'
+
+	select @MailBCC = isnull(Email,'dsamaddar@meridianfinancebd.com') from ApplicationType where ApplicationTypeId in (
+	select ApplicationTypeId from Application where ApplicationId = @ApplicationId
+	);
+	
 
 	Declare @Initiator as nvarchar(100) Set @Initiator = '';
 	Declare @InitiatorMail as nvarchar(50) set @InitiatorMail = '';
@@ -669,8 +704,7 @@ begin
 
 	Select @MailSubject as 'MailSubject',@MailBody as 'MailBody' ,Case When @MailFrom='' then 'info@meridianfinancebd.com' else @MailFrom end  as 'MailFrom',
 	Case When @MailTo='' then 'divit@meridianfinancebd.com' else @MailTo end as 'MailTo',
-	Case When @MailCC='' then 'divit@meridianfinancebd.com' else @MailCC end as 'MailCC',
-	'dsamaddar@meridianfinancebd.com' as 'MailBCC'
+	Case When @MailCC='' then 'divit@meridianfinancebd.com' else @MailCC end as 'MailCC',@MailBCC as 'MailBCC';
 
 end
 
@@ -752,7 +786,7 @@ create proc spCheckUserLogin
 @UserName nvarchar(100)
 as
 begin
-	select * from ModuleUser where UserName = @UserName;
+	select * from ModuleUser where UserName = @UserName and IsVisible = 1;
 end
 
 GO
@@ -822,9 +856,16 @@ end
 GO
 
 alter proc spGetApplicationInfoById
-@ApplicationId int
+@ApplicationId int,
+@ModuleUserId nvarchar(50)
 as
 begin
+	
+	if exists(select * from dbo.Application where ApplicationId=@ApplicationId)
+	begin
+		insert into tblViewLog(ApplicationId,ModuleUserId) Values(@ApplicationId,@ModuleUserId);
+	end
+
 	select a.ApplicationId,a.ApplicantId,m.DisplayName as 'Initiator',ISNULL(a.Title,'') as Title,
 	ISNULL(a.Description,'') as Description,ISNULL(a.Amount,0) as Amount,t.ApplicationTypeId,
 	t.ApplicationTypeText as 'Type',a.ApplicationStatusId,s.ApplicationStatusText as 'Status',a.FileName,
@@ -907,6 +948,19 @@ GO
 
 GO
 
+create function fnCountInitiatedTaskByUserId(@ModuleUserId int)
+returns int
+as
+begin
+	declare @count as int set @count = 0;
+
+	select @count = count(*) from Application f where f.ApplicantId = @ModuleUserId;
+
+	return @count;
+end
+
+GO
+
 create function fnCountPendingTaskByUserId(@ModuleUserId int)
 returns int
 as
@@ -937,27 +991,40 @@ end
 GO
 
 GO
+-- exec spGetEmpTaskCountList 361
 alter proc spGetEmpTaskCountList
+@ID int
 as
 begin
-	/*
-	select  ModuleUserId, DisplayName + ' ( ' + convert(nvarchar,Total) + ' )' as UserName from (
-	select m.ModuleUserId,m.DisplayName, count(*) as Total
-	from ProcessFlow f inner join ModuleUser m on f.ApproverId = m.ModuleUserId
-	where f.ProcessFlowDecisionId = 4
-	group by m.DisplayName,m.ModuleUserId
-	) as x order by Total desc;
-	*/
 
-
-	Select  ModuleUserId, DisplayName + ' P:' + convert(nvarchar,PendingTask) + '|C:' + convert(nvarchar,CompletedTask) + ' )' as UserName 
+	Select  ModuleUserId, DisplayName + ' I:' + convert(nvarchar,InitiatedTask) + ' | P:' + convert(nvarchar,PendingTask) + ' | C:' + convert(nvarchar,CompletedTask) + ' )' as UserName 
 	from (
-	select m.ModuleUserId,m.DisplayName,dbo.fnCountPendingTaskByUserId(m.ModuleUserId) as PendingTask,
+	select m.ModuleUserId,m.DisplayName,dbo.fnCountInitiatedTaskByUserId(m.ModuleUserId) as InitiatedTask,dbo.fnCountPendingTaskByUserId(m.ModuleUserId) as PendingTask,
 	dbo.fnCountPerformedTaskByUserId(m.ModuleUserId) as CompletedTask
 	from ModuleUser m where m.IsVisible=1
-	and m.ModuleUserId not in (239,252,270,374)
+	--and m.ModuleUserId not in (239,252,270,374,465)
+	and m.ModuleUserId = @ID
 	) as x order by PendingTask desc;
+end
 
+GO
+
+create proc spGetInitiatedTaskListByUser
+@ModuleUserId int
+as
+begin
+	select p.ProcessFlowId,p.ApproverId,a.ApplicationId,a.FileName,replace(a.FileName,'.pdf','_approved.pdf') as ApprovedFileName,
+	t.ApplicationTypeText as Type,a.Description,m.DisplayName as Initiator,s.ApplicationStatusText as Status,
+	convert(nvarchar,a.CreatedDate,106) as CreatedDate,p.ProcessFlowDecisionId,d.ProcessFlowDecisionText as Decision,
+	ISNULL(p.Comment,'') as Comment,p.DecisionDate
+	from Application a 
+	inner join ProcessFlow p on a.ApplicationId = p.ApplicationId
+	inner join ApplicationType t on a.ApplicationTypeId = t.ApplicationTypeId
+	inner join ModuleUser m on a.ApplicantId = m.ModuleUserId
+	inner join ApplicationStatus s on a.ApplicationStatusId = s.ApplicationStatusId
+	inner join ProcessFlowDecision d on p.ProcessFlowDecisionId = d.ProcessFlowDecisionId
+	Where a.ApplicantId = @ModuleUserId
+	order by a.CreatedDate desc
 end
 
 GO
@@ -977,7 +1044,7 @@ begin
 	inner join ApplicationStatus s on a.ApplicationStatusId = s.ApplicationStatusId
 	inner join ProcessFlowDecision d on p.ProcessFlowDecisionId = d.ProcessFlowDecisionId
 	Where a.ApplicationStatusId IN (2) and p.ApproverId = @ModuleUserId and p.ProcessFlowDecisionId IN (4)
-	order by a.CreatedDate
+	order by a.CreatedDate desc
 end
 
 -- exec spGetPendingTaskListByUser 332
@@ -1001,7 +1068,7 @@ begin
 	inner join ApplicationStatus s on a.ApplicationStatusId = s.ApplicationStatusId
 	inner join ProcessFlowDecision d on p.ProcessFlowDecisionId = d.ProcessFlowDecisionId
 	Where a.ApplicationStatusId NOT IN (2) and p.ApproverId = @ModuleUserId and p.ProcessFlowDecisionId NOT IN (4)
-	order by a.CreatedDate
+	order by a.CreatedDate desc
 end
 
 -- exec spGetPerformedTaskListByUser 332
@@ -1012,6 +1079,7 @@ GO
 -- select * from ProcessFlowDecision
 
 alter proc spFindTasksAndStatus
+@ModuleUserId int,
 @Description nvarchar(100),
 @ApplicationTypeId int,
 @ApproverId int,
@@ -1068,8 +1136,9 @@ begin
 	and p.ApproverId like @ApproverIdParam
 	and p.ProcessFlowDecisionId like @ProcessFlowDecisionIdParam
 	and a.CreatedDate between @StartDate and DATEADD(day,1,@EndDate)
-	and a.ApplicationTypeId not in (38,42,50,52,60,61,70,121,200)
-	order by a.CreatedDate
+	--and a.ApplicationTypeId not in (38,42,48,49,50,52,60,61,70,121,200)
+	and ( p.ApproverId in (@ModuleUserId) or a.ApplicantId in (@ModuleUserId) )
+	order by a.CreatedDate desc
 end
 
 GO
@@ -1111,12 +1180,29 @@ end
 
 GO
 
-create proc spGetApplicationSleepTime
-@id nvarchar(50)
+alter proc rptGetPerformanceReport
+@UserName nvarchar(50),
+@StartDate date,
+@EndDate date
 as
 begin
-	select SleepTime as 'data','Integer' as data_type from ApplicationType where ApplicationTypeId=@id;
+	select V.ApplicationTypeText,V.DisplayName,Count(*) as total_count from (
+	select m.UserName,t.ApplicationTypeText,m.DisplayName from Application a 
+	inner join ModuleUser m on a.ApplicantId = m.ModuleUserId
+	inner join ApplicationType t on a.ApplicationTypeId = t.ApplicationTypeId
+	Where a.CreatedDate between @StartDate and @EndDate and a.ApplicationStatusId = 3
+	UNION ALL
+	select m.UserName,t.ApplicationTypeText,m.DisplayName from ProcessFlow f
+	inner join Application a on f.ApplicationId = a.ApplicationId
+	inner join ModuleUser m on a.ApplicantId = m.ModuleUserId
+	inner join ApplicationType t on a.ApplicationTypeId = t.ApplicationTypeId
+	Where a.CreatedDate between @StartDate and @EndDate and a.ApplicationStatusId = 3	
+	) as V
+	Where V.UserName = @UserName
+	group by V.ApplicationTypeText,V.DisplayName
+	order by V.DisplayName;
 end
 
--- exec spGetApplicationSleepTime '5'
 GO
+
+exec rptGetPerformanceReport 'dsamaddar','01/01/2022','12/31/2022'

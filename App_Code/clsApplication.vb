@@ -187,7 +187,6 @@ Public Class clsApplication
 
 #End Region
 
-
 #Region " Permanent Reject Application"
 
     Public Function fnPermanentRejectApplication(ByVal ApplicationId As Integer, ByVal RejectionRemarks As String) As clsResult
@@ -342,7 +341,6 @@ Public Class clsApplication
 
 #End Region
 
-
 #Region " Get Transferable Applications "
 
     Public Function fnGetTransferableApplications(ByVal ModuleUserId As Integer) As DataSet
@@ -399,7 +397,7 @@ Public Class clsApplication
 
 #Region " Get Application Info ById "
 
-    Public Function fnGetApplicationInfoById(ByVal ApplicationId As Integer) As clsApplication
+    Public Function fnGetApplicationInfoById(ByVal ApplicationId As Integer, ByVal ModuleUserId As String) As clsApplication
 
         Dim sp As String = "spGetApplicationInfoById"
         Dim app_info As New clsApplication()
@@ -410,6 +408,7 @@ Public Class clsApplication
             Using cmd = New SqlCommand(sp, con)
                 cmd.CommandType = CommandType.StoredProcedure
                 cmd.Parameters.AddWithValue("@ApplicationId", ApplicationId)
+                cmd.Parameters.AddWithValue("@ModuleUserId", ModuleUserId)
                 dr = cmd.ExecuteReader()
                 While dr.Read()
                     app_info.ApplicationId = dr.Item("ApplicationId")
@@ -646,6 +645,33 @@ Public Class clsApplication
                 con.Close()
 
                 Return MailProp
+            End Using
+        Catch ex As Exception
+            If con.State = ConnectionState.Open Then
+                con.Close()
+            End If
+            Return Nothing
+        End Try
+    End Function
+
+#End Region
+
+#Region " Get View Log "
+
+    Public Function fnGetViewLog(ByVal ModuleUserId As Integer) As DataSet
+
+        Dim sp As String = "spGetViewLog"
+        Dim da As SqlDataAdapter = New SqlDataAdapter()
+        Dim ds As DataSet = New DataSet()
+        Try
+            con.Open()
+            Using cmd = New SqlCommand(sp, con)
+                cmd.CommandType = CommandType.StoredProcedure
+                cmd.Parameters.AddWithValue("@ModuleUserId", ModuleUserId)
+                da.SelectCommand = cmd
+                da.Fill(ds)
+                con.Close()
+                Return ds
             End Using
         Catch ex As Exception
             If con.State = ConnectionState.Open Then
