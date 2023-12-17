@@ -23,6 +23,19 @@ begin
 end
 
 GO
+-- exec spGetViewLogAll
+alter proc spGetViewLogAll
+as
+begin
+	select v.ApplicationId,u.DisplayName as 'Initiator',t.ApplicationTypeText as ApplicationType,x.DisplayName as ViewBy,
+	v.ViewDate from tblViewLog v 
+	inner join dbo.Application a on v.ApplicationId = a.ApplicationId
+	inner join dbo.ApplicationType t on a.ApplicationTypeId = t.ApplicationTypeId
+	inner join dbo.ModuleUser u on a.ApplicantId = u.ModuleUserId
+	inner join dbo.ModuleUser x on v.ModuleUserId = x.ModuleUserId
+end
+
+GO
 
 ----------------------------- Module User -----------------------------
 
