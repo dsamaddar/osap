@@ -245,4 +245,39 @@ Public Class clsProcessFlow
 
 #End Region
 
+
+#Region " Find Tasks And Status IA"
+
+    Public Function fnFindTasksAndStatusIA(ByVal ModuleUserId As Integer, ByVal Description As String, ByVal ApplicationTypeId As Integer, ByVal ApproverId As Integer, ByVal ProcessFlowDecisionId As Integer, ByVal StartDate As Date, ByVal EndDate As Date) As DataSet
+
+        Dim sp As String = "spFindTasksAndStatusIA"
+        Dim da As SqlDataAdapter = New SqlDataAdapter()
+        Dim ds As DataSet = New DataSet()
+        Try
+            con.Open()
+            Using cmd = New SqlCommand(sp, con)
+                cmd.CommandType = CommandType.StoredProcedure
+                cmd.Parameters.AddWithValue("@ModuleUserId", ModuleUserId)
+                cmd.Parameters.AddWithValue("@Description", Description)
+                cmd.Parameters.AddWithValue("@ApplicationTypeId", ApplicationTypeId)
+                cmd.Parameters.AddWithValue("@ApproverId", ApproverId)
+                cmd.Parameters.AddWithValue("@ProcessFlowDecisionId", ProcessFlowDecisionId)
+                cmd.Parameters.AddWithValue("@StartDate", StartDate)
+                cmd.Parameters.AddWithValue("@EndDate", EndDate)
+                da.SelectCommand = cmd
+                da.Fill(ds)
+                con.Close()
+                Return ds
+            End Using
+        Catch ex As Exception
+            If con.State = ConnectionState.Open Then
+                con.Close()
+            End If
+            Return Nothing
+        End Try
+    End Function
+
+#End Region
+
+
 End Class

@@ -70,13 +70,14 @@
                                     <asp:MenuItem NavigateUrl="~/frmTransfer.aspx" Text="Transfer" Value="AccessFile">
                                     </asp:MenuItem>
                                     <asp:MenuItem NavigateUrl="~/frmFind.aspx" Text="Find" Value="Find">
+                                        <asp:MenuItem NavigateUrl="~/frmFindIA.aspx" Text="Find IA" Value="findia"></asp:MenuItem>
                                     </asp:MenuItem>
                                     <asp:MenuItem NavigateUrl="#" Text="Administration" Value="Administration">
-                                        <asp:MenuItem NavigateUrl="~/frmAdministration.aspx" Text="AD Sync"
-                                            Value="adsync"></asp:MenuItem>
-                                            <asp:MenuItem NavigateUrl="~/frmApplicationType.aspx" Text="Application Type"
-                                            Value="apptype"></asp:MenuItem>
-                                             <asp:MenuItem NavigateUrl="~/frmRejectApplication.aspx" Text="Reject Application"
+                                        <asp:MenuItem NavigateUrl="~/frmAdministration.aspx" Text="AD Sync" Value="adsync">
+                                        </asp:MenuItem>
+                                        <asp:MenuItem NavigateUrl="~/frmApplicationType.aspx" Text="Application Type" Value="apptype">
+                                        </asp:MenuItem>
+                                        <asp:MenuItem NavigateUrl="~/frmRejectApplication.aspx" Text="Reject Application"
                                             Value="rejectapp"></asp:MenuItem>
                                     </asp:MenuItem>
                                 </Items>

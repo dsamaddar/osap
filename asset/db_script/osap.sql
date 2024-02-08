@@ -1155,6 +1155,79 @@ begin
 end
 
 GO
+-- exec spFindTasksAndStatusIA 'dsamaddar','',6,0,1,'01/01/2020','06/16/2023'
+alter proc spFindTasksAndStatusIA
+@ModuleUserId int,
+@Description nvarchar(100),
+@ApplicationTypeId int,
+@ApproverId int,
+@ProcessFlowDecisionId int,
+@StartDate date,
+@EndDate date
+as
+begin
+
+	declare @ApplicationTypeIdParam as nvarchar(100) set @ApplicationTypeIdParam = '';
+	declare @ApplicationTypeTextParam as nvarchar(100) set @ApplicationTypeTextParam = '';
+	declare @ApproverIdParam as nvarchar(50) set @ApproverIdParam = '';
+	declare @ProcessFlowDecisionIdParam as nvarchar(50) set @ProcessFlowDecisionIdParam = '';
+
+
+	if @ApplicationTypeId = 0
+		set @ApplicationTypeTextParam = '%';
+	else
+	begin
+		select @ApplicationTypeTextParam = ApplicationTypeText from ApplicationType where ApplicationTypeId = @ApplicationTypeId;
+		--select ApplicationTypeText from ApplicationType where ApplicationTypeId = @ApplicationTypeId;
+		set @ApplicationTypeTextParam = '%' + convert(nvarchar,@ApplicationTypeTextParam) + '%';
+		--print @ApplicationTypeId;
+		--print @ApplicationTypeTextParam;
+		--print @StartDate;
+		--print @EndDate;
+	end
+
+	if @ApproverId = 0
+		set @ApproverIdParam = '%';
+	else
+		set @ApproverIdParam = '%' + convert(nvarchar,@ApproverId) + '%';
+
+	if @ProcessFlowDecisionId = 0
+		set @ProcessFlowDecisionIdParam = '%';
+	else
+		set @ProcessFlowDecisionIdParam = '%' + convert(nvarchar,@ProcessFlowDecisionId) + '%';
+
+	--select @ProcessFlowDecisionIdParam;
+
+	if @ModuleUserId != 340 and @ModuleUserId != 360  and @ModuleUserId != 361
+	begin
+		select '' ProcessFlowId,'' ApproverId,'' ApplicationId,'frmFileNotFound.aspx' FileName,'frmFileNotFound.aspx' ApprovedFileName,
+		'' ApplicationTypeId,'' as Type,'' Description,'' as Initiator,'' as Status,
+		'' as CreatedDate,'' ProcessFlowDecisionId,'' as Decision,
+		'' as 'Authorizer','' as Comment,'' as DecisionDate;
+	end
+
+	select p.ProcessFlowId,p.ApproverId,a.ApplicationId,a.FileName,replace(a.FileName,'.pdf','_approved.pdf') as ApprovedFileName,
+	t.ApplicationTypeId,t.ApplicationTypeText as Type,a.Description,m.DisplayName as Initiator,s.ApplicationStatusText as Status,
+	convert(nvarchar,a.CreatedDate,106) as CreatedDate,p.ProcessFlowDecisionId,d.ProcessFlowDecisionText as Decision,
+	dbo.fnGetUserNameById(p.ApproverId) as 'Authorizer',ISNULL(p.Comment,'') as Comment,convert(nvarchar,p.DecisionDate,106) as DecisionDate
+	from dbo.Application a 
+	inner join dbo.ProcessFlow p on a.ApplicationId = p.ApplicationId
+	inner join dbo.ApplicationType t on a.ApplicationTypeId = t.ApplicationTypeId
+	inner join dbo.ModuleUser m on a.ApplicantId = m.ModuleUserId
+	inner join dbo.ApplicationStatus s on a.ApplicationStatusId = s.ApplicationStatusId
+	inner join dbo.ProcessFlowDecision d on p.ProcessFlowDecisionId = d.ProcessFlowDecisionId
+	Where 
+	t.ApplicationTypeText like @ApplicationTypeTextParam
+	and (t.ApplicationTypeText like '%' + @Description + '%' or a.Description like '%' + @Description + '%' or p.Comment like '%' + @Description + '%')
+	and p.ApproverId like @ApproverIdParam
+	and p.ProcessFlowDecisionId like @ProcessFlowDecisionIdParam
+	and a.CreatedDate between @StartDate and DATEADD(day,1,@EndDate)
+	--and a.ApplicationTypeId not in (38,42,48,49,50,52,60,61,70,121,200)
+	--and ( p.ApproverId in (@ModuleUserId) or a.ApplicantId in (@ModuleUserId) )
+	order by a.CreatedDate desc
+end
+
+GO
 --select * from ProcessFlow where ApproverId = 332
 
 GO
