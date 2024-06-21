@@ -13,7 +13,7 @@
                         <tr>
                             <td colspan="2">
                                 <div class="widget-title">
-                                    Search By</div>
+                                    Find OSAP for General Purpose</div>
                             </td>
                         </tr>
                         <tr>

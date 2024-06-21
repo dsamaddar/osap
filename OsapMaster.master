@@ -69,8 +69,9 @@
                                     </asp:MenuItem>
                                     <asp:MenuItem NavigateUrl="~/frmTransfer.aspx" Text="Transfer" Value="AccessFile">
                                     </asp:MenuItem>
-                                    <asp:MenuItem NavigateUrl="~/frmFind.aspx" Text="Find" Value="Find">
-                                        <asp:MenuItem NavigateUrl="~/frmFindIA.aspx" Text="Find IA" Value="findia"></asp:MenuItem>
+                                    <asp:MenuItem NavigateUrl="#" Text="Find" Value="Find">
+                                        <asp:MenuItem NavigateUrl="~/frmFind.aspx" Text="Find General" Value="findia"></asp:MenuItem>
+                                        <asp:MenuItem NavigateUrl="~/frmFindIA.aspx" Text="Find ICC" Value="findia"></asp:MenuItem>
                                     </asp:MenuItem>
                                     <asp:MenuItem NavigateUrl="#" Text="Administration" Value="Administration">
                                         <asp:MenuItem NavigateUrl="~/frmAdministration.aspx" Text="AD Sync" Value="adsync">
