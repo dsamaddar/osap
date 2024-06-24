@@ -26,8 +26,6 @@ Partial Class frmAdministration
         Try
             If Session("UserName") = "dsamaddar" Then
                 SyncADUsers()
-	    else if Session("UserName") = "soykat" Then
-                SyncADUsers()
             End If
 
         Catch ex As Exception
@@ -71,17 +69,25 @@ Partial Class frmAdministration
             search.PropertiesToLoad.Add("mail")
             search.PropertiesToLoad.Add("usergroup")
             search.PropertiesToLoad.Add("displayname") 'first name
+            search.PropertiesToLoad.Add("department") ' department
+            search.PropertiesToLoad.Add("title") ' role
+            search.PropertiesToLoad.Add("physicalDeliveryOfficeName") ' branch
+            search.PropertiesToLoad.Add("userAccountControl") ' Is Enabled 514 = Disabled Account – Normal Account; 66050 = Disabled, Password Doesn’t Expire
             search.PropertiesToLoad.Add("objectGUID")
 
             Dim resultCol As SearchResultCollection = search.FindAll()
 
             If resultCol.Count > 0 Then
                 For Each result As SearchResult In resultCol
-                    If result.Properties.Contains("samaccountname") And result.Properties.Contains("mail") And result.Properties.Contains("displayname") Then
+                    If result.Properties.Contains("samaccountname") And result.Properties.Contains("mail") And result.Properties.Contains("displayname") And result.Properties.Contains("physicalDeliveryOfficeName") And result.Properties.Contains("department") And result.Properties.Contains("title") Then
                         module_user.Guid = UnicodeBytesToString(result.Properties("objectGUID")(0))
                         module_user.DisplayName = result.Properties("displayname")(0)
                         module_user.UserName = result.Properties("samaccountname")(0)
                         module_user.Email = result.Properties("mail")(0)
+                        module_user.Branch = result.Properties("physicalDeliveryOfficeName")(0)
+                        module_user.Department = result.Properties("department")(0)
+                        module_user.Role = result.Properties("title")(0)
+                        module_user.userAccountControl = result.Properties("userAccountControl")(0)
                         rel = ModuleUserData.fnInsertModuleUser(module_user)
                     End If
                 Next

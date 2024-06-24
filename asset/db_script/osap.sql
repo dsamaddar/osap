@@ -39,20 +39,38 @@ GO
 
 ----------------------------- Module User -----------------------------
 
-create proc spInsertModuleUser
+alter proc spInsertModuleUser
 @Guid nvarchar(100),
 @DisplayName nvarchar(100),
 @UserName nvarchar(50),
-@Email nvarchar(50)
+@Email nvarchar(50),
+@Branch nvarchar(100),
+@Department nvarchar(100),
+@Role nvarchar(100),
+@userAccountControl int
 as
 begin
+	declare @IsVisible as bit set @IsVisible = 1;
+
 	if not exists(select * from ModuleUser m where m.UserName = @UserName)
 	begin
 		insert into ModuleUser(Guid,DisplayName,UserName,Email,IsVisible)
 		values(@Guid,@DisplayName,@UserName,@Email,1);
 	end
+	else
+	begin
+		if @userAccountControl = 514 or @userAccountControl = 66050
+		begin
+			set @IsVisible = 0
+		end
+
+		update ModuleUser set DisplayName = @DisplayName,UserName = @UserName,Email=@Email,
+		Branch = @Branch,Department = @Department,Role = @Role,IsVisible = @IsVisible
+		where ModuleUser.Guid = @Guid
+	end
 end
 
+GO
 ----------------------------- Module User -----------------------------
 
 ----------------------------- Application Type ------------------------
@@ -1009,6 +1027,8 @@ alter proc spGetEmpTaskCountList
 @ID int
 as
 begin
+	Declare @Department as nvarchar(100) set @Department = '';
+	select @Department = Department from ModuleUser where ModuleUserId = @ID
 
 	Select  ModuleUserId, DisplayName + ' I:' + convert(nvarchar,InitiatedTask) + ' | P:' + convert(nvarchar,PendingTask) + ' | C:' + convert(nvarchar,CompletedTask) + ' )' as UserName 
 	from (
@@ -1016,7 +1036,7 @@ begin
 	dbo.fnCountPerformedTaskByUserId(m.ModuleUserId) as CompletedTask
 	from ModuleUser m where m.IsVisible=1
 	--and m.ModuleUserId not in (239,252,270,374,465)
-	and m.ModuleUserId = @ID
+	and m.Department = @Department
 	) as x order by PendingTask desc;
 end
 

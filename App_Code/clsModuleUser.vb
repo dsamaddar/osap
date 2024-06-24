@@ -104,6 +104,18 @@ Public Class clsModuleUser
         End Set
     End Property
 
+    Dim _userAccountControl As Integer
+
+    Public Property userAccountControl() As Integer
+        Get
+            Return _userAccountControl
+        End Get
+        Set(ByVal value As Integer)
+            _userAccountControl = value
+        End Set
+    End Property
+
+
     Dim _CreatedDate As Date
 
     Public Property CreatedDate() As Date
@@ -173,6 +185,10 @@ Public Class clsModuleUser
             cmd.Parameters.AddWithValue("@DisplayName", module_user.DisplayName)
             cmd.Parameters.AddWithValue("@UserName", module_user.UserName)
             cmd.Parameters.AddWithValue("@Email", module_user.Email)
+            cmd.Parameters.AddWithValue("@Branch", module_user.Branch)
+            cmd.Parameters.AddWithValue("@Department", module_user.Department)
+            cmd.Parameters.AddWithValue("@Role", module_user.Role)
+            cmd.Parameters.AddWithValue("@userAccountControl", module_user.userAccountControl)
             cmd.ExecuteNonQuery()
             con.Close()
             result.Success = True
