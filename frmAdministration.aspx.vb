@@ -24,7 +24,7 @@ Partial Class frmAdministration
 
     Protected Sub btnAdSync_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnAdSync.Click
         Try
-            If Session("UserName") = "dsamaddar" Then
+            If Session("UserName") = "dsamaddar" Or Session("UserName") = "soykat" Then
                 SyncADUsers()
             End If
 
